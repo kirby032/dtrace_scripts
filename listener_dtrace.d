@@ -23,6 +23,8 @@ syscall::close:return /pid == $1 && self->fd/
 
     rbp_3 = *(uint64_t*)copyin(rbp_2,8);
     rip_3 = *(uint64_t*)copyin(rbp_2 + 8,8);
+
+    self->fd = 0;
 }
 
 pid$1::SetNonblock:entry
@@ -44,6 +46,7 @@ pid$1::SetNonblock:return /self->nonBlockFd && self->nonBlockFd != my_fd && arg1
     printf("#3\t0x%x\n", (uint64_t)rip_3);
 
     ustack();
+    self->nonBlockFd = 0;
 }
 
 pid$1::SetNonblock:return /self->nonBlockFd && self->nonBlockFd == my_fd && arg1 != 0/
@@ -61,6 +64,13 @@ pid$1::SetNonblock:return /self->nonBlockFd && self->nonBlockFd == my_fd && arg1
     printf("#3\t0x%x\n", (uint64_t)rip_3);
 
     ustack();
+    self->nonBlockFd = 0;
+}
+
+
+pid$1::SetNonblock:return /arg1 == 0 && self->nonBlockFd/
+{
+    self->nonBlockFd = 0;
 }
 
 pid$1::ApplySocketOptions:entry
@@ -82,6 +92,7 @@ pid$1::ApplySocketOptions:return /self->applySocketFd && self->applySocketFd != 
     printf("#3\t0x%x\n", (uint64_t)rip_3);
 
     ustack();
+    self->applySocketFd = 0;
 }
 
 pid$1::ApplySocketOptions:return /self->applySocketFd && self->applySocketFd == my_fd && arg1 != 0/
@@ -99,6 +110,12 @@ pid$1::ApplySocketOptions:return /self->applySocketFd && self->applySocketFd == 
     printf("#3\t0x%x\n", (uint64_t)rip_3);
 
     ustack();
+    self->applySocketFd = 0;
+}
+
+pid$1::ApplySocketOptions:return /self->applySocketFd/
+{
+    self->applySocketFd = 0;
 }
 
 syscall::close:return /pid == $1 && arg1 != 0 && errno == EBADF/
